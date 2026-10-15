@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -21,29 +21,24 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Extract standalone project
+      - name: Extract Android project
         run: |
           unzip -o JARVIS-Mobile-Standalone-Source.zip -d source
-          find source -maxdepth 4 -type f | head -80
+          ls -la source/JARVIS-Android
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Build APK
-        run: |
-          find source -name gradlew -type f
-          cd source
-          gradle assembleDebug
+        working-directory: source/JARVIS-Android
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-Mobile-debug-APK
-          path: source/**/build/outputs/apk/debug/*.apk
+          path: source/JARVIS-Android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           
